@@ -1299,10 +1299,10 @@ const u8 RAM_IMG2_VALID_PATTEN[20] = {
 	(FW_INFO_RSV3),
 	(FW_INFO_RSV4)
 };
-
+extern VOID SOCPS_WakeFromPG_KM4(VOID);
 IMAGE2_ENTRY_SECTION
 RAM_START_FUNCTION Img2EntryFun0 = {
 	app_start,
-	NULL,//BOOT_RAM_WakeFromPG,
+	SOCPS_WakeFromPG_KM4,
 	(u32)NewVectorTable
 };

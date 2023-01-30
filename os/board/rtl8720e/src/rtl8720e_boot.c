@@ -305,7 +305,7 @@ void board_initialize(void)
 	board_gpio_initialize();
 	board_i2c_initialize();
 	board_spi_initialize();
-	board_i2s_initialize();
+	// board_i2s_initialize();
 #ifdef CONFIG_WATCHDOG
 	amebalite_wdg_initialize(CONFIG_WATCHDOG_DEVPATH, 5000);
 #endif
@@ -334,10 +334,10 @@ void board_initialize(void)
 	app_ftl_init();
 #endif
 #ifdef CONFIG_AMEBALITE_WIFI
-	wlan_initialize();
+	// wlan_initialize();
 #endif
 #ifdef CONFIG_AMEBALITE_BLE
-	bt_ipc_api_init_host();
+	// bt_ipc_api_init_host();
 #endif
 }
 #else
