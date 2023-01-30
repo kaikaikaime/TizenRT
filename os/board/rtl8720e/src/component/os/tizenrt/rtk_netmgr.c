@@ -549,7 +549,7 @@ trwifi_result_e wifi_netmgr_utils_get_info(struct netdev *dev, trwifi_info *wifi
 				if (wifi_is_connected_to_ap() == RTK_STATUS_SUCCESS) {
 					wifi_info->wifi_status = TRWIFI_CONNECTED;
 					rtw_phy_statistics_t phy_statistics;
-					if (wifi_fetch_phy_statistic(&phy_statistics) == RTK_STATUS_SUCCESS){
+					if (wifi_fetch_phy_statistic(STA_WLAN_INDEX, &phy_statistics) == RTK_STATUS_SUCCESS){
 						wifi_info->rssi = (int)phy_statistics.rssi;
 					}
 				} else {
@@ -664,15 +664,17 @@ trwifi_result_e wifi_netmgr_utils_ioctl(struct netdev *dev, trwifi_msg_s *msg)
 		int ips_mode, lps_mode;
 		if (*mode == TRWIFI_POWERMODE_ON) {
 			ndbg("[RTK] set power mode on\n");
-			ips_mode = 1;
-			lps_mode = 1;
-			wifi_set_powersave_mode(ips_mode, lps_mode);
+			ips_mode = TRUE;
+			lps_mode = TRUE;
+			wifi_set_ips_enable(ips_mode);
+			wifi_set_ips_enable(ips_mode);
 			return TRWIFI_SUCCESS;
 		} else if (*mode == TRWIFI_POWERMODE_OFF) {
 			ndbg("[RTK] set power mode off\n");
-			ips_mode = 0;
-			lps_mode = 0;
-			wifi_set_powersave_mode(ips_mode, lps_mode);
+			ips_mode = FALSE;
+			lps_mode = FALSE;
+			wifi_set_ips_enable(ips_mode);
+			wifi_set_ips_enable(ips_mode);
 			return TRWIFI_SUCCESS;
 		}
 	}
