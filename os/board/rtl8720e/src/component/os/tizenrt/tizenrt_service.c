@@ -134,12 +134,12 @@ void _tizenrt_timer_wrapper(void *timer)
 
 /********************* os depended service ********************/
 
-u8 *_tizenrt_malloc(u32 sz)
+void *_tizenrt_malloc(u32 sz)
 {
 	return kmm_malloc(sz);
 }
 
-u8 *_tizenrt_zmalloc(u32 sz)
+void *_tizenrt_zmalloc(u32 sz)
 {
 	return kmm_zalloc(sz);
 }
@@ -883,6 +883,18 @@ static void _tizenrt_resume_task(void *task)
 	return;
 }
 
+static void _tizenrt_suspend_task_all(void)
+{
+	DBG_INFO("\n");
+	return;
+}
+
+static void _tizenrt_resume_task_all(void)
+{
+	DBG_INFO("\n");
+	return;
+}
+
 static void _tizenrt_thread_enter(char *name)
 {
 	DBG_INFO("RTKTHREAD %s\n", name);
@@ -898,7 +910,7 @@ static void _tizenrt_thread_exit(void)
 #endif
 }
 
-_timerHandle _tizenrt_timerCreate(const signed char *pcTimerName, osdepTickType xTimerPeriodInTicks, u32 uxAutoReload, void *pvTimerID, TIMER_FUN pxCallbackFunction)
+_timerHandle _tizenrt_timerCreate(const signed char *pcTimerName, osdepTickType xTimerPeriodInTicks, uint32_t uxAutoReload, void *pvTimerID, TIMER_FUN pxCallbackFunction)
 {
 	struct timer_list_priv *timer = (struct timer_list_priv *)_tizenrt_zmalloc(sizeof(struct timer_list_priv));
 	if (timer == NULL) {
@@ -1298,6 +1310,8 @@ const struct osdep_service_ops osdep_service = {
 	_tizenrt_get_priority_task,	//rtw_get_priority_task
 	_tizenrt_suspend_task,			//rtw_suspend_task
 	_tizenrt_resume_task,			//rtw_resume_task
+	_tizenrt_suspend_task_all,		//rtw_suspend_task_all
+	_tizenrt_resume_task_all,		//rtw_resume_task_all
 
 	_tizenrt_thread_enter,		//rtw_thread_enter
 	_tizenrt_thread_exit,		//rtw_thread_exit

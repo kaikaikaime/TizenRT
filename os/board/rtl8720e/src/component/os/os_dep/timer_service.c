@@ -235,7 +235,7 @@ void mod_timer(struct timer_list *timer, u32 delay_time_ms)
 							   NULL,			// Uniq id used to identify which timer expire..
 							   timer_wrapper		// Timer callback
 						   );
-
+						   
 		if (timer->timer_hdl == NULL) {
 			DBG_ERR("Fail to init timer");
 		} else {
@@ -253,10 +253,11 @@ void mod_timer(struct timer_list *timer, u32 delay_time_ms)
 	}
 
 	//Set Timer period
-	if (timer->timer_hdl != NULL)
+	if (timer->timer_hdl != NULL){
 		if (rtw_timerChangePeriod(timer->timer_hdl, rtw_ms_to_systime(delay_time_ms), TIMER_MAX_DELAY) == _FAIL) {
 			DBG_ERR("Fail to set timer period");
 		}
+	}
 }
 
 int timer_pending(const struct timer_list *timer)

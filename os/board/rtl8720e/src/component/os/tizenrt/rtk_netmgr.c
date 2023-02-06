@@ -135,7 +135,6 @@ static int save_scan_list(trwifi_scan_list_s *p_scan_list)
 		rtw_init_timer(&(scan_timer), &(scan_timer), _scan_timer_handler, &(scan_timer), "dynamic_chk_timer");
 		vddbg("Start scan timer\n");
 	}
-
 	rtw_set_timer(&(scan_timer), SCAN_TIMER_DURATION);
 
 	scan_number	 = 0;
@@ -629,7 +628,7 @@ trwifi_result_e wifi_netmgr_utils_stop_softap(struct netdev *dev)
 	trwifi_result_e wuret = TRWIFI_FAIL;
 	int ret;
 	if (g_mode == RTK_WIFI_SOFT_AP_IF) {
-		ret = cmd_wifi_off();
+		ret = cmd_wifi_stop_ap();
 		if (ret == RTK_STATUS_SUCCESS) {
 			g_mode = RTK_WIFI_NONE;
 			wuret = TRWIFI_SUCCESS;

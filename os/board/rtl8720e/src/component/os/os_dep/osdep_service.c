@@ -1331,10 +1331,10 @@ _timerHandle rtw_timerCreate(const signed char *pcTimerName,
 							 void *pvTimerID,
 							 TIMER_FUN pxCallbackFunction)
 {
-	if (osdep_service.rtw_timerCreate)
+	if (osdep_service.rtw_timerCreate){
 		return osdep_service.rtw_timerCreate(pcTimerName, xTimerPeriodInTicks, uxAutoReload,
 											 pvTimerID, pxCallbackFunction);
-	else {
+	} else {
 		OSDEP_DBG("Not implement osdep service: rtw_timerCreate");
 	}
 

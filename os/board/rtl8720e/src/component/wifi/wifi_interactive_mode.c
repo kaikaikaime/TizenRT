@@ -157,10 +157,6 @@ extern void cmd_simple_config(int argc, char **argv);
 extern void cmd_update(int argc, char **argv);
 #endif
 
-#if CONFIG_WEBSERVER
-extern void start_web_server(void);
-extern void stop_web_server(void);
-#endif
 extern void cmd_app(int argc, char **argv);
 #if CONFIG_ENABLE_WPS
 extern void cmd_wps(int argc, char **argv);
@@ -249,14 +245,19 @@ void dhcpd_event(void)
 {
 	return;
 }
-
+extern struct netif xnetif[NET_IF_NUM]; /* network interface structure */
 int8_t cmd_wifi_ap(trwifi_softap_config_s *softap_config)
 {
 	int ret = 0;
 	rtw_security_t security_type;
 	char *password;
 	rtw_softap_info_t rtw_AP_config = {0};
-
+#if CONFIG_LWIP_LAYER
+	struct netif *pnetif = &xnetif[STA_WLAN_INDEX];
+	u32 ip_addr;
+	u32 netmask;
+	u32 gw;
+#endif
 	nvdbg("\n\rStarting AP ...");
 
 	switch (softap_config->ap_auth_type) {
@@ -301,6 +302,15 @@ int8_t cmd_wifi_ap(trwifi_softap_config_s *softap_config)
 	rtw_AP_config.password_len = softap_config->passphrase_length;
 	rtw_AP_config.channel = softap_config->channel;
 
+
+#if CONFIG_LWIP_LAYER
+	dhcps_stop(pnetif);
+	ip_addr = WIFI_MAKEU32(GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
+	netmask = WIFI_MAKEU32(NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3);
+	gw = WIFI_MAKEU32(GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
+	LwIP_SetIP(STA_WLAN_INDEX, ip_addr, netmask, gw);
+#endif
+
 	wifi_stop_ap();
 	if (wifi_start_ap(&rtw_AP_config) != RTW_SUCCESS) {
 		ndbg("\n\rERROR: Operation failed!");
@@ -308,6 +318,14 @@ int8_t cmd_wifi_ap(trwifi_softap_config_s *softap_config)
 	}
 
 	nvdbg("\r\nap start");
+
+#if CONFIG_LWIP_LAYER
+	ip_addr = WIFI_MAKEU32(AP_IP_ADDR0, AP_IP_ADDR1, AP_IP_ADDR2, AP_IP_ADDR3);
+	netmask = WIFI_MAKEU32(AP_NETMASK_ADDR0, AP_NETMASK_ADDR1, AP_NETMASK_ADDR2, AP_NETMASK_ADDR3);
+	gw = WIFI_MAKEU32(AP_GW_ADDR0, AP_GW_ADDR1, AP_GW_ADDR2, AP_GW_ADDR3);
+	LwIP_SetIP(STA_WLAN_INDEX, ip_addr, netmask, gw);
+	dhcps_start(pnetif);
+#endif
 
 	return ret;
 }
@@ -712,6 +730,13 @@ int8_t cmd_wifi_off(void)
 	return -1;
 }
 
+int8_t cmd_wifi_stop_ap(void)
+{
+	if (!wifi_stop_ap())
+		return 0;
+	return -1;
+}
+
 static void print_scan_result(rtw_scan_result_t *record)
 {
 	RTW_API_INFO("%s\t ", (record->bss_type == RTW_BSS_TYPE_ADHOC) ? "Adhoc" : "Infra");
@@ -818,13 +843,6 @@ exit:
 		vPortFree(channel_list);
 	if (argc > 2 && pscan_config)
 		vPortFree(pscan_config);
-}
-#endif
-
-#if CONFIG_WEBSERVER
-static void cmd_wifi_start_webserver(int argc, char **argv)
-{
-	start_web_server();
 }
 #endif
 

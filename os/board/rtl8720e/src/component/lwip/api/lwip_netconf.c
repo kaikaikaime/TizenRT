@@ -763,7 +763,8 @@ void LwIP_AUTOIP_STOP(uint8_t idx)
 	netifapi_autoip_stop(pnetif);
 }
 #endif
-#if 0//LWIP_IPV6
+#if !defined(CONFIG_PLATFORM_TIZENRT_OS)
+#if LWIP_IPV6
 /* Get IPv6 address with lwip 1.5.0 */
 void LwIP_AUTOIP_IPv6(struct netif *pnetif)
 {
@@ -777,6 +778,7 @@ void LwIP_AUTOIP_IPv6(struct netif *pnetif)
 		   ipv6[0], ipv6[1],  ipv6[2],  ipv6[3],  ipv6[4],  ipv6[5],  ipv6[6], ipv6[7],
 		   ipv6[8], ipv6[9], ipv6[10], ipv6[11], ipv6[12], ipv6[13], ipv6[14], ipv6[15]);
 }
+#endif
 #endif
 
 uint32_t LWIP_Get_Dynamic_Sleep_Interval()

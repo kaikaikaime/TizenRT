@@ -425,13 +425,13 @@ int wifi_on(rtw_mode_t mode)
 		printf("[RTK] Link callback handles: registered\n");
 	}
 #endif
-	DiagPrintf("\n\r%s: line %d", __func__, __LINE__);
+
 	wifi_set_user_config();
-	DiagPrintf("\n\r%s: line %d", __func__, __LINE__);
+
 	param_buf[0] = mode;
 	inic_ipc_host_init_skb();
 	ret = inic_ipc_api_host_message_send(IPC_API_WIFI_ON, param_buf, 1);
-	DiagPrintf("\n\r%s: line %d", __func__, __LINE__);
+
 	if (wifi_boot == 0) {
 		wifi_boot = 1;
 		init_timer_wrapper();
@@ -441,18 +441,17 @@ int wifi_on(rtw_mode_t mode)
 			p_wifi_do_fast_connect();
 		}
 	}
-	DiagPrintf("\n\r%s: line %d", __func__, __LINE__);
+
 	if (ret == RTW_SUCCESS) { //wifi on success
-#if 0//CONFIG_LWIP_LAYER
-DiagPrintf("\n\r%s: line %d", __func__, __LINE__);
+#if !defined(CONFIG_PLATFORM_TIZENRT_OS)
+#if CONFIG_LWIP_LAYER
 		if (mode == RTW_MODE_STA) {
-			DiagPrintf("\n\r%s: line %d", __func__, __LINE__);
 			LwIP_netif_set_up(0);
-			DiagPrintf("\n\r%s: line %d", __func__, __LINE__);
 		}
 #endif
+#endif
 	}
-	DiagPrintf("\n\r%s: line %d", __func__, __LINE__);
+
 	return ret;
 }
 
