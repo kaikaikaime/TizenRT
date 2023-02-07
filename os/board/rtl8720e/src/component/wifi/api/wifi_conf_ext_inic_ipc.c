@@ -817,6 +817,7 @@ int wifi_csi_config(rtw_csi_action_parm_t *act_param)
 	param_buf[0] = (u32)act_param;
 	DCache_Clean((u32)act_param, sizeof(rtw_csi_action_parm_t));
 	ret = inic_ipc_api_host_message_send(IPC_API_WIFI_CONFIG_CSI, param_buf, 1);
+	DCache_Invalidate((u32)act_param, sizeof(rtw_csi_action_parm_t));
 	return ret;
 }
 
