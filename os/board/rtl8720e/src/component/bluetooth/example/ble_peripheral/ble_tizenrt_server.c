@@ -328,7 +328,7 @@ trble_conn_handle rtw_ble_server_get_conn_handle_by_address(uint8_t* mac)
     return conn_handle;
 }
 
-void rtw_ble_server_adv_into_idle(void)
+trble_result_e rtw_ble_server_adv_into_idle(void)
 {
     rtk_bt_le_gap_dev_state_t new_state;
     if(RTK_BT_OK != rtk_bt_le_gap_get_dev_state(&new_state))
@@ -406,6 +406,7 @@ void rtw_ble_server_adv_into_idle(void)
 		}
     } while(new_state.gap_adv_state != GAP_ADV_STATE_IDLE);
     debug_print("ADV STATE : IDLE \n");
+	return TRBLE_SUCCESS;
 }
 
 /* Set Advertisement Data API */

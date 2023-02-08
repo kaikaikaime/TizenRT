@@ -174,7 +174,7 @@ void scan_stop_cb(void *arg)
     if (RTK_BT_OK != rtk_bt_le_gap_stop_scan())
     {
  	   debug_print("stop scan failed! \n");
-       return TRBLE_FAIL;
+       return;
     }
     rtk_bt_le_gap_dev_state_t new_state;
     do {
