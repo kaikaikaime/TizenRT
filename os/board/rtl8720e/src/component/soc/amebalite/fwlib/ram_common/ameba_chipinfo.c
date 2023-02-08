@@ -104,7 +104,7 @@ u32 ChipInfo_PSRAMType(void)
 {
 	u8 i = 0;
 	u16 BDnum = ChipInfo_BDNum();
-	u32 memoryinfo;
+	u32 memoryinfo = 0;
 #if 0 //customer sele todo
 #endif
 	/* debug package */

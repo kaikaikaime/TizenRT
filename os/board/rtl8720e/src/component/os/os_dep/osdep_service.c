@@ -933,10 +933,10 @@ uint32_t rtw_get_current_time(void)
 	return 0;
 }
 
-u32 rtw_systime_to_ms(u32 systime)
+u32 rtw_systime_to_ms(u32 systimer)
 {
 	if (osdep_service.rtw_systime_to_ms) {
-		return osdep_service.rtw_systime_to_ms(systime);
+		return osdep_service.rtw_systime_to_ms(systimer);
 	} else {
 		OSDEP_DBG("Not implement osdep service: rtw_systime_to_ms");
 	}
@@ -944,10 +944,10 @@ u32 rtw_systime_to_ms(u32 systime)
 	return 0;
 }
 
-u32 rtw_systime_to_sec(u32 systime)
+u32 rtw_systime_to_sec(u32 systimer)
 {
 	if (osdep_service.rtw_systime_to_sec) {
-		return osdep_service.rtw_systime_to_sec(systime);
+		return osdep_service.rtw_systime_to_sec(systimer);
 	} else {
 		OSDEP_DBG("Not implement osdep service: rtw_systime_to_sec");
 	}

@@ -177,7 +177,7 @@ static void I2S_RX_ISR(void)
 	//read data
 	pRX_BLOCK prx_block = &(sp_rx_info.rx_block[sp_rx_info.rx_usr_cnt]);
 	DCache_CleanInvalidate((u32)prx_block->rx_addr, sp_rx_info.rx_page_size);
-	I2SUserCB.RxCCB(NULL, (void *)(u32)prx_block->rx_addr);
+	I2SUserCB.RxCCB((uint32_t)NULL, (void *)(u32)prx_block->rx_addr);
 
 	i2s_get_free_rx_page();
 }

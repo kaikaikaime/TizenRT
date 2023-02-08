@@ -991,7 +991,6 @@ void SOCPS_AP_resume_config(u32 type, u32 Protection)
 NON_DRAM_TEXT_SECTION
 void SOCPS_NP_suspend(u32 type)
 {
-	u32 Rtemp;
 	RRAM_TypeDef *rram = RRAM_DEV;
 
 	if (rram->PMC_CORE_ROLE_Flag == PMC_CORE_ROLE_SINGLE) {

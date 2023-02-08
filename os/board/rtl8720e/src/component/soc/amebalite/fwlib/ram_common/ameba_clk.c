@@ -474,8 +474,7 @@ void XTAL_PDCK(void)
 	xtal->XTAL_ANAPAR_XTAL_PDCK |= XTAL_BIT_EN_XTAL_PDCK_DIGI;
 
 }
-//AmebaLite is unable to find
-#define MHZ_TICK_CNT 1000000
+
 /**
   * @brief  Set CPU clock Source.
   * @param  Source: This parameter can be one of the following values:

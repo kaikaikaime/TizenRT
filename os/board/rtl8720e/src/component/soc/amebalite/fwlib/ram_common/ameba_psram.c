@@ -34,8 +34,8 @@ u8 WB_WR_INIT_LATENCY_SPEC[8] = {
 	WB_WR_INIT_LATENCY_5CLK,
 	WB_WR_INIT_LATENCY_6CLK,
 	WB_WR_INIT_LATENCY_7CLK,
-	NULL,
-	NULL,
+	(int)NULL,
+	(int)NULL,
 	WB_WR_INIT_LATENCY_10CLK
 };
 
@@ -50,10 +50,10 @@ static u32 PSRAM_CALIB_PATTERN[6] = {
 
 const PSRAM_Latency Psram_latency[] = {
 	//Clk limit	  latency	   psram type
-	{104,			4,			NULL},
-	{133,			5,			NULL},
-	{166,			6,			NULL},
-	{200,			7,			NULL},
+	{104,			4,			(int)NULL},
+	{133,			5,			(int)NULL},
+	{166,			6,			(int)NULL},
+	{200,			7,			(int)NULL},
 	{250,			7,			PSRAM_VENDOR_WB | PSRAM_SIZE_256Mb},
 	{250,			8, 			PSRAM_VENDOR_APM},
 	{250,			10,			PSRAM_VENDOR_WB | PSRAM_SIZE_128Mb},
@@ -733,7 +733,7 @@ void set_psram_sleep_mode(u32 type)
 	u8 psraminfo[2];
 	RRAM_TypeDef *rram = RRAM_DEV;
 
-	PSRAM_AutoGating(DISABLE, NULL, NULL);
+	PSRAM_AutoGating(DISABLE, (uint32_t)NULL, (uint32_t)NULL);
 
 	// 50ns will be enough, check if need
 	DelayUs(1);
@@ -779,7 +779,7 @@ void set_psram_wakeup_mode(u32 type)
 	u32 cur_src = LSYS_GET_CKSL_PSRAM(HAL_READ32(SYSTEM_CTRL_BASE, REG_LSYS_CKSL_GRP0));
 	RRAM_TypeDef *rram = RRAM_DEV;
 
-	PSRAM_AutoGating(DISABLE, NULL, NULL);
+	PSRAM_AutoGating(DISABLE, (u32)NULL, (u32)NULL);
 
 	DCache_CleanInvalidate(0x60000100, 32);
 	temp = HAL_READ32(0x60000100, 0);

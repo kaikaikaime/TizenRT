@@ -2401,13 +2401,13 @@ void AUDIO_CODEC_Playback(u32 i2s_sel, u32 type, I2S_InitTypeDef *I2S_InitStruct
 
 	if (type == APP_DAAD_LPBK) {
 
-		AUDIO_CODEC_SetDACSrc(i2s_sel, I2SL, NULL);
+		AUDIO_CODEC_SetDACSrc(i2s_sel, I2SL, (uint32_t)NULL);
 		AUDIO_CODEC_SetANAClk(ENABLE);
 	}
 
 	if (type == APP_LINE_OUT) {
 
-		AUDIO_CODEC_SetDACSrc(i2s_sel, I2SL, NULL);
+		AUDIO_CODEC_SetDACSrc(i2s_sel, I2SL, (uint32_t)NULL);
 		AUDIO_CODEC_SetANAClk(ENABLE);
 		AUDIO_CODEC_SetLDOMode(POWER_ON);
 		AUDIO_CODEC_DisPAD(PAD_DACL);
@@ -2418,12 +2418,12 @@ void AUDIO_CODEC_Playback(u32 i2s_sel, u32 type, I2S_InitTypeDef *I2S_InitStruct
 	}
 
 	if (type == APP_PDM_OUT) {
-		AUDIO_CODEC_SetDACSrc(i2s_sel, I2SL, NULL);
+		AUDIO_CODEC_SetDACSrc(i2s_sel, I2SL, (uint32_t)NULL);
 		AUDIO_CODEC_SetPDMClk(DAC_L, PDM_5M, ENABLE);
 	}
 
 	if (type == APP_TESTTONE) {
-		AUDIO_CODEC_SetDACSrc(i2s_sel, TESTTONE, NULL);
+		AUDIO_CODEC_SetDACSrc(i2s_sel, TESTTONE, (uint32_t)NULL);
 		AUDIO_CODEC_SetTesttone(3, ENABLE);
 	}
 }
