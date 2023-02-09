@@ -99,7 +99,7 @@
 #define CONFIG_WLAN 1
 #define CONFIG_AS_INIC_AP 1
 #undef  CONFIG_AS_INIC_NP
-#undef  CONFIG_HIGH_TP_TEST
+#define CONFIG_HIGH_TP_TEST
 #define CONFIG_LWIP_LAYER 1
 
 /*

@@ -12,6 +12,7 @@
 #include <tinyara/mm/heap_regioninfo.h>
 
 #include "ameba_soc.h"
+#include "amebalite_reboot_reason.h"
 //#include "psram_reserve.h"
 
 #if defined(CONFIG_EXAMPLE_CM_BACKTRACE) && CONFIG_EXAMPLE_CM_BACKTRACE
@@ -988,7 +989,7 @@ void app_mpu_s_nocache_init(void)
 #endif
 }
 
-#ifdef CONFIG_AMEBAD_TRUSTZONE
+#ifdef CONFIG_AMEBALITE_TRUSTZONE
 void app_hardfualt_s_prehanlder(uint32_t fault_id)
 {
 	//write reboot reason, TrustZone watchdog
@@ -1258,6 +1259,10 @@ void app_start(void)
 	flash_layout_init();
 #ifndef CONFIG_XIP_FLASH
 	app_psram_suspend();
+#endif
+
+#ifdef CONFIG_AMEBALITE_TRUSTZONE
+	Secure_VectorTableOverride(app_hardfualt_s_prehanlder);
 #endif
 
 #ifdef CONFIG_PLATFORM_TIZENRT_OS
