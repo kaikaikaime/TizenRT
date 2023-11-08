@@ -145,20 +145,14 @@ void board_spi_initialize(void)
 void board_i2c_initialize(void)
 {
 #ifdef CONFIG_I2C
-	FAR struct i2c_dev_s *i2c;
-	int bus = 0;
-	int ret;
-	char path[16];
-
-	snprintf(path, sizeof(path), "/dev/i2c-%d", bus);
-	i2c = up_i2cinitialize(bus);
-#ifdef CONFIG_I2C_USERIO
-	if (i2c) {
-		ret = i2c_uioregister(path, i2c);
-		if (ret < 0) {
-			up_i2cuninitialize(i2c);
-		}
-	}
+#if defined(RTL8730E_I2C0) && (RTL8730E_I2C0 == 1)
+	amebasmart_i2c_register(0);
+#endif
+#if defined(RTL8730E_I2C1) && (RTL8730E_I2C1 == 1)
+	amebasmart_i2c_register(1);
+#endif
+#if defined(RTL8730E_I2C2) && (RTL8730E_I2C2 == 1)
+	amebasmart_i2c_register(2);
 #endif
 #endif
 }

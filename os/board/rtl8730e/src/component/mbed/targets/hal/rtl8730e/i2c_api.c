@@ -107,7 +107,7 @@ void i2c_init(i2c_t *obj, PinName sda, PinName scl)
 
 	/* Init I2C now */
 	if (I2CInitDat[obj->i2c_idx].I2CIdx == 0) {
-		I2CInitDat[obj->i2c_idx].I2CIPClk = 10000000;
+		I2CInitDat[obj->i2c_idx].I2CIPClk = 20000000;
 		RCC_PeriphClockCmd(APBPeriph_I2C0, APBPeriph_I2C0_CLOCK, DISABLE);
 		RCC_PeriphClockCmd(APBPeriph_I2C0, APBPeriph_I2C0_CLOCK, ENABLE);
 	} else if (I2CInitDat[obj->i2c_idx].I2CIdx == 1) {
@@ -329,6 +329,7 @@ int rtk_i2c_write(i2c_t *obj, int address, const char *data, int length, int sto
 		I2CInitDat[obj->i2c_idx].I2CAckAddr = address;
 
 		/* Init I2C now */
+		printf("idx = %d obj->I2Cx %d\n", obj->i2c_idx, obj->I2Cx);
 		I2C_Init(obj->I2Cx, &I2CInitDat[obj->i2c_idx]);
 		I2C_Cmd(obj->I2Cx, ENABLE);
 	}
