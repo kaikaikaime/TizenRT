@@ -83,7 +83,6 @@
 #include "amebasmart_boot.h"
 #include "ameba_soc.h"
 #include "osdep_service.h"
-#include "platform_opts_bt.h"
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -320,27 +319,10 @@ void amebasmart_mount_partitions(void)
 #endif /* CONFIG_FLASH_PARTITION */
 }
 
-#ifdef CONFIG_FTL_ENABLED
-extern u8 ftl_phy_page_num;
-extern u32 ftl_phy_page_start_addr;
-#include "ftl_int.h"
-extern void flash_get_layout_info(u32 type, u32 *start, u32 *end);
-
-void app_ftl_init(void)
+void amebasmart_memory_initialize(void)
 {
-	u32 ftl_start_addr, ftl_end_addr;
 
-	flash_get_layout_info(FTL, &ftl_start_addr, &ftl_end_addr);
-
-	ftl_phy_page_start_addr = ftl_start_addr - SPI_FLASH_BASE;
-	ftl_phy_page_num = (ftl_end_addr - ftl_start_addr +1) / PAGE_SIZE_4K;
-
-	if (SYSCFG_BootFromNor()) {
-		ftl_init(ftl_phy_page_start_addr, ftl_phy_page_num);
-	}
 }
-
-#endif
 
 /****************************************************************************
  * Name: board_initialize
@@ -373,9 +355,10 @@ void board_initialize(void)
 	shell_init_rom(0, 0);
 	amebasmart_mount_partitions();
 	board_gpio_initialize();
-	board_i2c_initialize();
+	//note* rtl8730e_ub6470_initialize(0); will do i2s/i2xc initialisation
+	// board_i2c_initialize();
 	board_spi_initialize();
-	board_i2s_initialize();
+	// board_i2s_initialize();
 #ifdef CONFIG_WATCHDOG
 	amebasmart_wdg_initialize(CONFIG_WATCHDOG_DEVPATH, 5000);
 #endif
@@ -400,29 +383,15 @@ void board_initialize(void)
 		}
 	}
 #endif
-
-#ifdef CONFIG_FTL_ENABLED
-	app_ftl_init();
-#endif
-
 #ifdef CONFIG_AMEBASMART_WIFI
 	wlan_initialize();
 #endif
-
-	/* RTK ToDo: move the KM4 version print to the KM4 part */
-	char km0_application_rev_temp[] = "km0_application_ver_ad855c0_2024/02/01-13:58:48";
-	lldbg("KM4_version %s\n", km0_application_rev_temp);
-
-#ifdef CONFIG_AUDIO_ALC1019
-	rtl8730e_alc1019_initialize(0);
+#ifdef CONFIG_AMEBASMART_BLE
+	// bt_ipc_api_init_host();
 #endif
-	IPC_MSG_STRUCT ipc_msg_loguart;
-
-	ipc_msg_loguart.msg_type = IPC_USER_POINT;
-	ipc_msg_loguart.msg = 0;
-	ipc_msg_loguart.msg_len = 1;
-	ipc_msg_loguart.rsvd = 0; /* for coverity init issue */
-	ipc_send_message(IPC_AP_TO_LP, IPC_A2L_DISLOGUART, &ipc_msg_loguart);
+#ifdef CONFIG_AUDIO_UB6470
+	rtl8730e_ub6470_initialize(0);
+#endif
 }
 #else
 #error "CONFIG_BOARD_INITIALIZE MUST ENABLE"

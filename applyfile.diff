@@ -1,0 +1,8 @@
+diff --git a/tools/fs/contents-smartfs/.gitignore b/tools/fs/contents-smartfs/.gitignore
+deleted file mode 100644
+index a68d087bf..000000000
+--- a/tools/fs/contents-smartfs/.gitignore
++++ /dev/null
+@@ -1,2 +0,0 @@
+-/*
+-!/.gitignore

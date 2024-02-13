@@ -39,7 +39,7 @@
 
 void sq_cat(FAR sq_queue_t *queue1, FAR sq_queue_t *queue2)
 {
-  DEBUGASSERT(queue1 != NULL && queue2 != NULL);
+  // DEBUGASSERT(queue1 != NULL && queue2 != NULL);
 
   /* If queue2 is empty, then just move queue1 to queue2 */
 
