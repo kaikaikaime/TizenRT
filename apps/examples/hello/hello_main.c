@@ -56,6 +56,7 @@
 
 #include <tinyara/config.h>
 #include <stdio.h>
+#include <tinyara/serial/serial.h>
 
 /****************************************************************************
  * hello_main
@@ -68,5 +69,9 @@ int hello_main(int argc, char *argv[])
 #endif
 {
 	printf("Hello, World!!\n");
+
+	uart_register("/dev/ttyS0", &TTYS0_DEV);
+	rtl8730e_up_setup(&TTYS0_DEV);
+	rtl8730e_up_send(&TTYS0_DEV, 'y');
 	return 0;
 }
