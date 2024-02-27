@@ -1,7 +1,7 @@
 #ifndef _LOG_H_
 #define _LOG_H_
 
-#define CONFIG_LOG_DEFAULT_LEVEL        RTK_LOG_INFO
+#define CONFIG_LOG_DEFAULT_LEVEL        RTK_LOG_DEBUG
 //1. Compiling log level into image(or .axf/.elf)
 #ifndef COMPIL_LOG_LEVEL
 #define COMPIL_LOG_LEVEL                CONFIG_LOG_DEFAULT_LEVEL

@@ -34,12 +34,6 @@ int rtw_get_random_bytes(void *buf, u32 len)
 	return 0;
 }
 
-int rtw_get_random_bytes_f_rng(void *p_rng, unsigned char *output, size_t output_size)
-{
-	UNUSED(p_rng);
-	return rtw_get_random_bytes(output, output_size);
-}
-
 u32 rtw_getFreeHeapSize(void)
 {
 	return 0;
@@ -157,7 +151,9 @@ BOOL irq_register(IRQ_FUN IrqFun, IRQn_Type IrqNum, u32 Data, u32 Priority)
 	if (IrqNum == WL_DMA_IRQ || IrqNum == WL_PROTOCOL_IRQ) {
 		Priority = 4;
 	}
-	TizenUserIrqFunTable[IrqNum] = (IRQ_FUN)((u32) IrqFun | 0x1);
+
+	TizenUserIrqFunTable[IrqNum] = (IRQ_FUN)((u32) IrqFun);
+
 	irq_attach(IrqNum + AMEBASMART_IRQ_FIRST, (xcpt_t)wrapper_IrqFun, (void *)Data);
 	up_prioritize_irq(IrqNum + AMEBASMART_IRQ_FIRST, Priority);	// Use the API in arm_gicv2.c
 	return _TRUE;
@@ -192,18 +188,3 @@ void irq_disable(IRQn_Type IrqNum)
 	up_disable_irq(IrqNum + AMEBASMART_IRQ_FIRST);
 }
 
-void irq_clear_pending(IRQn_Type IrqNum)
-{
-	up_clear_pending_irq(IrqNum + AMEBASMART_IRQ_FIRST);
-}
-
-void irq_set_pending(IRQn_Type IrqNum)
-{
-	/*cannot Set-pending bits for SGIs*/
-	up_set_pending_irq(IrqNum + AMEBASMART_IRQ_FIRST);
-}
-
-uint32_t irq_get_pending(IRQn_Type IrqNum)
-{
-	return up_irq_is_pending(IrqNum + AMEBASMART_IRQ_FIRST);
-}

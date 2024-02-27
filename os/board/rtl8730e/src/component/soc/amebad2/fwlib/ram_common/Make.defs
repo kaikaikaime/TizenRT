@@ -77,7 +77,8 @@ CSRCS += ameba_i2c.c \
 	ameba_wakepin.c \
 	ameba_otp.c \
 	ameba_codec.c \
-	ameba_pll.c
+	ameba_pll.c \
+	ameba_usb.c
 	#ameba_ftl.c \
 	#ameba_mpu_ram.c \
 	#ameba_pmc_com.c \
@@ -88,3 +89,4 @@ CSRCS += ameba_i2c.c \
 
 DEPPATH += --dep-path component/soc/amebad2/fwlib/ram_common
 VPATH += :component/soc/amebad2/fwlib/ram_common
+

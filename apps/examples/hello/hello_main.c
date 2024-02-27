@@ -56,11 +56,12 @@
 
 #include <tinyara/config.h>
 #include <stdio.h>
-
+#include <pthread.h>
 /****************************************************************************
  * hello_main
  ****************************************************************************/
-
+extern void example_usbh_cdc_acm_thread(void);
+int count = 0;
 #ifdef CONFIG_BUILD_KERNEL
 int main(int argc, FAR char *argv[])
 #else
@@ -68,5 +69,14 @@ int hello_main(int argc, char *argv[])
 #endif
 {
 	printf("Hello, World!!\n");
+	count++;
+	
+	if (count == 2) {
+		pthread_t pid;
+
+		 pthread_create(&pid, NULL, example_usbh_cdc_acm_thread, NULL);
+
+    }
+	
 	return 0;
 }

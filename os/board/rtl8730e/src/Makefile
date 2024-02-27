@@ -125,6 +125,12 @@ include component/file_system/ftl/Make.defs
 include component/file_system/kv/Make.defs
 include component/file_system/vfs2.0/Make.defs
 
+#zhenbei added include usb make.defs
+#include component/usb/host_new/core/Make.defs
+#include component/usb/common_new/Make.defs
+#lib
+include component/usb/host_new/cdc_acm/Make.defs
+
 ARCH_SRCDIR = 	$(TOPDIR)/arch/$(CONFIG_ARCH)/src
 BOARD_SRCDIR = 	$(TOPDIR)/board
 PROJ_DIR = 	$(BOARD_SRCDIR)/$(CONFIG_ARCH_BOARD)/src/project/realtek_amebaD2_va0_example
@@ -138,6 +144,8 @@ DIR_BT = 	$(BOARD_SRCDIR)/$(CONFIG_ARCH_BOARD)/src/component/bluetooth
 endif
 
 TARGETDIR = 	$(COMPONENT_DIR)/soc/amebad2
+#zhenbei added USB file path
+DIR_USB = 	$(BOARD_SRCDIR)/$(CONFIG_ARCH_BOARD)/src/component/usb
 
 CFLAGS += -I$(BOARD_SRCDIR)/$(CONFIG_ARCH_BOARD)/include
 CFLAGS += -I$(TOPDIR)/arch/$(CONFIG_ARCH)/src/armv7-a
@@ -184,6 +192,15 @@ CFLAGS += -I$(DIR_BT)/api/rtk_stack
 CFLAGS += -I$(DIR_BT)/rtk_stack/inc
 CFLAGS += -I$(DIR_BT)/rtk_stack/platform/amebad2/inc
 endif
+
+#zhenbei added for include headers
+
+# CFLAGS += -I$(DIR_USB)/device_new
+#Lib
+CFLAGS += -I$(DIR_USB)/common_new
+CFLAGS += -I$(DIR_USB)/host_new/cdc_acm
+CFLAGS += -I$(DIR_USB)/host_new/core 
+#CFLAGS += -DARM_CORE_CM4
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
 SRCS = $(ASRCS) $(CSRCS)
@@ -234,3 +251,4 @@ distclean: clean
 
 -include Make.dep
 #include $(TOPDIR)/configs/Board.mk
+

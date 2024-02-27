@@ -1,6 +1,6 @@
 ###########################################################################
 #
-# Copyright 2023 Samsung Electronics All Rights Reserved.
+# Copyright 2020 Samsung Electronics All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,11 +49,7 @@
 #
 ############################################################################
 
-CSRCS += rtl8730e_boot.c
-CSRCS += rtl8730e_i2schar.c
+CSRCS += usbh_cdc_acm.c \
 
-ifeq ($(CONFIG_AUDIO_ALC1019),y)
-CSRCS += rtl8730e_alc1019.c
-endif
-
-CSRCS += test_file.c
+DEPPATH += --dep-path component/usb/host_new/cdc_acm
+VPATH += :component/usb/host_new/cdc_acm
