@@ -55,5 +55,3 @@ CSRCS += rtl8730e_i2schar.c
 ifeq ($(CONFIG_AUDIO_ALC1019),y)
 CSRCS += rtl8730e_alc1019.c
 endif
-
-CSRCS += test_file.c
