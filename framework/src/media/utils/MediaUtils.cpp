@@ -83,6 +83,8 @@ namespace utils {
 				| ((header[7] & 0x7f) << 14) \
 				| ((header[8] & 0x7f) << 7) \
 				| ((header[9] & 0x7f)) )
+// MP3 ID3v2 footer length
+#define MP3_ID3V2_FOOTER_LENGTH 10
 
 // Frame size = frame samples * (1 / sample rate) * bitrate / 8 + padding
 //            = frame samples * bitrate / 8 / sample rate + padding
@@ -617,18 +619,41 @@ static bool isMpeg2Ts(const unsigned char *buffer, size_t size)
 	return true;
 }
 
+static bool checkId3V2Header(const unsigned char *buffer, size_t size, FILE *fp = nullptr)
+{
+	if (fp) {
+		size = fread((void *)buffer, sizeof(unsigned char), size, fp);
+	}
+	if ((MP3_ID3V2_HEADER_LENGTH <= size) && (memcmp("ID3", buffer, 3) == 0)) {
+		medvdbg("id3v2 tag found\n");
+		size_t id3Size = MP3_ID3V2_TAG_SIZE(buffer);
+		bool isFooterPresent = (buffer[5] & 0x10) != 0 ? true : false;
+		size_t sizeToSeek = isFooterPresent ? MP3_ID3V2_HEADER_LENGTH + id3Size + MP3_ID3V2_FOOTER_LENGTH : MP3_ID3V2_HEADER_LENGTH + id3Size;
+		if (fp) {
+			if (fseek(fp, sizeToSeek, SEEK_SET) != 0) {
+				meddbg("Error seeking data frame in mp3 file\n");
+				return false;
+			}
+		} else {
+			if (size <= sizeToSeek) {
+				meddbg("Not enough to seek data frame, ID3v2 tag size: %u\n", id3Size);
+				return false;
+			}
+			buffer += sizeToSeek;
+			size -= sizeToSeek;
+		}
+	} else {
+		medvdbg("id3v2 tag not found\n");
+	}
+	return true;
+}
+
 static bool isMp3(const unsigned char *buffer, size_t size)
 {
-	// Check ID3v2 tag
-	if ((MP3_ID3V2_HEADER_LENGTH <= size) && (memcmp("ID3", buffer, 3) == 0)) {
-		size_t id3Size = MP3_ID3V2_TAG_SIZE(buffer);
-		if (size <= MP3_ID3V2_HEADER_LENGTH + id3Size) {
-			meddbg("Not enough to seek data frame, ID3v2 tag size: %u\n", id3Size);
-			return false;
-		}
-		// Skip ID3v2 tag
-		buffer += MP3_ID3V2_HEADER_LENGTH + id3Size;
-		size -= MP3_ID3V2_HEADER_LENGTH + id3Size;
+	bool ret = checkId3V2Header(buffer, size);
+	if (!ret) {
+		meddbg("check for Id3V2 header fails\n");
+		return false;
 	}
 	// try to parse MP3 header
 	unsigned int channel;
@@ -698,7 +723,7 @@ audio_type_t getAudioTypeFromPath(std::string datapath)
 	} else if ((extension.compare("flac") == 0)) {
 		medvdbg("audio type : flac\n");
 		return AUDIO_TYPE_FLAC;
-	} else if ((extension.compare("") == 0) || (extension.compare("pcm") == 0) || (extension.compare("raw") == 0)) {
+	} else if ((extension.compare("pcm") == 0) || (extension.compare("raw") == 0)) {
 		medvdbg("audio type : pcm\n");
 		return AUDIO_TYPE_PCM;
 	} else if (extension.compare(AUDIO_EXT_TYPE_WAV) == 0) {
@@ -738,7 +763,7 @@ audio_type_t getAudioTypeFromMimeType(std::string &mimeType)
 
 	return audioType;
 }
-
+#ifdef CONFIG_CODEC_MP3
 bool mp3_header_parsing(const unsigned char *header, unsigned int *channel, unsigned int *sampleRate, unsigned int *frameLength)
 {
 /**
@@ -837,7 +862,8 @@ bool mp3_header_parsing(const unsigned char *header, unsigned int *channel, unsi
 	}
 	return true;
 }
-
+#endif /* CONFIG_CODEC_MP3 */
+#ifdef CONFIG_CODEC_AAC
 bool aac_header_parsing(const unsigned char *header, unsigned int *channel, unsigned int *sampleRate, unsigned int *frameLength)
 {
 /**
@@ -852,7 +878,7 @@ bool aac_header_parsing(const unsigned char *header, unsigned int *channel, unsi
 *...
 *H - Channel Mode
 *...
-*M - frame length, header length (ProtectionAbsent == 1 ? 7 : 9) + size(AACFrame)
+*M -ï¿½frame length, header length (ProtectionAbsent == 1 ? 7 : 9) + size(AACFrame)
 *...
 */
 	unsigned char bit;
@@ -944,7 +970,7 @@ bool aac_header_parsing(const unsigned char *header, unsigned int *channel, unsi
 	}
 	return true;
 }
-
+#endif /* CONFIG_CODEC_AAC */
 bool wave_header_parsing(const unsigned char *header, unsigned int *channel, unsigned int *sampleRate, audio_format_type_t *pcmFormat)
 {
 /**
@@ -1001,10 +1027,19 @@ bool file_header_parsing(FILE *fp, audio_type_t audioType, unsigned int *channel
 	unsigned char tag[2];
 	bool isHeader;
 	int ret;
+	bool res;
 
 	switch (audioType) {
+#ifdef CONFIG_CODEC_MP3
 	case AUDIO_TYPE_MP3:
 		isHeader = false;
+		/* https://id3.org/d3v2.3.0 check id3v3 tag in file */
+		unsigned char id3Header[MP3_ID3V2_HEADER_LENGTH];
+		res = checkId3V2Header(id3Header, MP3_ID3V2_HEADER_LENGTH, fp);
+		if (!res) {
+			meddbg("check for Id3V2 header fails\n");
+			return false;
+		}
 		while (fread(tag, sizeof(unsigned char), 2, fp) == 2) {
 			/* 12 bits for MP3 Sync Word(the beginning of the frame) */
 			if ((tag[0] == 0xFF) && ((tag[1] & 0xF0) == 0xF0)) {
@@ -1051,6 +1086,8 @@ bool file_header_parsing(FILE *fp, audio_type_t audioType, unsigned int *channel
 			return false;
 		}
 		break;
+#endif /* CONFIG_CODEC_MP3 */
+#ifdef CONFIG_CODEC_AAC
 	case AUDIO_TYPE_AAC:
 		isHeader = false;
 		while (fread(tag, sizeof(unsigned char), 1, fp) > 0) {
@@ -1081,6 +1118,7 @@ bool file_header_parsing(FILE *fp, audio_type_t audioType, unsigned int *channel
 			return false;
 		}
 		break;
+#endif /* CONFIG_CODEC_AAC */
 	case AUDIO_TYPE_WAVE:
 		header = (unsigned char *)malloc(sizeof(unsigned char) * (WAVE_HEADER_LENGTH + 1));
 		if (header == NULL) {
@@ -1138,6 +1176,7 @@ bool buffer_header_parsing(const unsigned char *buffer, unsigned int bufferSize,
 	unsigned int frameLength;
 	unsigned int counter = 0;
 	switch (audioType) {
+#ifdef CONFIG_CODEC_MP3
 	case AUDIO_TYPE_MP3:
 		for (headPoint = 0; headPoint + MP3_HEADER_LENGTH <= bufferSize ; headPoint++) {
 			/* 11 bits for MP3 Sync Word(the beginning of the frame) */
@@ -1162,6 +1201,8 @@ bool buffer_header_parsing(const unsigned char *buffer, unsigned int bufferSize,
 		}
 		medvdbg("no header\n");
 		return false;
+#endif /* CONFIG_CODEC_MP3 */
+#ifdef CONFIG_CODEC_AAC
 	case AUDIO_TYPE_AAC:
 		for (headPoint = 0; headPoint + AAC_HEADER_LENGTH <= bufferSize; headPoint++) {
 			/* 12 bits for ADTS Sync Word(the beginning of the frame) */
@@ -1186,6 +1227,7 @@ bool buffer_header_parsing(const unsigned char *buffer, unsigned int bufferSize,
 		}
 		medvdbg("no header\n");
 		return false;
+#endif /* CONFIG_CODEC_AAC */
 	case AUDIO_TYPE_WAVE:
 		if (WAVE_HEADER_LENGTH <= bufferSize) {
 			if (!wave_header_parsing(buffer, channel, sampleRate, pcmFormat)) {

@@ -54,7 +54,12 @@ include ${TOPDIR}/tools/Config.mk
 ARCH_FAMILY = $(patsubst "%",%,$(CONFIG_ARCH_FAMILY))
 include ${TOPDIR}/arch/$(CONFIG_ARCH)/src/$(ARCH_FAMILY)/Toolchain.defs
 
+ifeq ($(CONFIG_RTL8730E_BOARD_REVISION), 7)
+LDSCRIPT = rlx8730e_img2_ddr.ld
+else
 LDSCRIPT = rlx8730e_img2.ld
+endif
+
 
 ifeq ($(CONFIG_LIBCXX_HAVE_LIBSUPCXX),y)
 ifeq ($(CONFIG_LIBCXX_EXCEPTION),y)
@@ -175,6 +180,15 @@ ifeq ($(CONFIG_LIBCXX_EXCEPTION),y)
   CXXFLAGS += -fexceptions
 else
   CXXFLAGS += -fno-exceptions
+endif
+
+ifeq ($(CONFIG_EXTERNAL_CMSIS_DSP),y)
+CFLAGS += -DARM_MATH_NEON
+CXXFLAGS += -DARM_MATH_NEON
+CXXFLAGS += -I$(TOPDIR)/../os/arch/arm/include/amebasmart/cmsis_dsp
+CMSIS_DSP_DIR_NAME_UNQUOTATED = ${shell echo $(CONFIG_ARCH_BOARD)}
+CMSIS_DSP_LIB = lib_cmsis_dsp
+LINK_CMSIS_DSP_LIB = -l_cmsis_dsp
 endif
 
 ifeq ($(CONFIG_EXTERNAL_CMSIS_NN),y)

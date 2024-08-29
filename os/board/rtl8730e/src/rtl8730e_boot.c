@@ -118,7 +118,13 @@ int up_check_prodswd(void)
 }
 int up_check_proddownload(void)
 {
-	return up_check_prod();
+	u8 hw_download, sw_download;
+	OTP_Read8(SEC_CFG2, &hw_download);
+	OTP_Read8(0x369, &sw_download);
+	if ((hw_download & 1) && (sw_download & 0x08)) {
+		return OK;
+	}
+	return ERROR;
 }
 #endif
 
@@ -435,10 +441,9 @@ void board_initialize(void)
 	rtl8730_st7789_initialize();
 #endif
 
-#if defined(CONFIG_LCD_ST7785) || defined(CONFIG_LCD_ST7701)
+#if defined(CONFIG_LCD_ST7785) || defined(CONFIG_LCD_ST7701) || defined(CONFIG_LCD_ST7701SN)
 	rtl8730e_lcdc_initialize();
 #endif
-
 
 #ifdef CONFIG_WATCHDOG
 	amebasmart_wdg_initialize(CONFIG_WATCHDOG_DEVPATH, 5000);
@@ -476,9 +481,25 @@ void board_initialize(void)
 #endif
 	/* Enable IPC buffered print */
 	inic_ipc_buffered_printf_set_np_enable(1);
+
 #ifdef CONFIG_AUDIO_ALC1019
-	rtl8730e_alc1019_initialize(0);
+	if (rtl8730e_alc1019_initialize(0) != 0) {
+		lldbg("ALC1019 initialization failed\n");
+	}
 #endif
+
+#ifdef CONFIG_AUDIO_SYU645B
+	if (rtl8730e_syu645b_initialize(0) != 0) {
+		lldbg("syu645b initialization failed\n");
+	}
+#endif
+
+#ifdef CONFIG_AUDIO_NDP120
+	if (rtl8730e_ndp120_initialize(0) != 0) {
+		lldbg("NDP120 initialization failed\n");
+	}
+ #endif
+
 	IPC_MSG_STRUCT ipc_msg_loguart;
 
 	ipc_msg_loguart.msg_type = IPC_USER_POINT;

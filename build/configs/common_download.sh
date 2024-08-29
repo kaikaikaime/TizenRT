@@ -38,6 +38,12 @@ source ${BOARD_SPECIFIC_SCRIPT}
 source ${BOARD_CONFIG}
 source ${OS_PATH}/.bininfo
 
+if [ -c "/dev/$DEFAULT_PORT" ]; then
+	DEFAULT_PORT=$DEFAULT_PORT
+elif [ -c "/dev/$DEFAULT_PORT2" ]; then
+	DEFAULT_PORT=$DEFAULT_PORT2
+fi
+
 USBRULE_PATH=${TOP_PATH}/build/configs/usbrule.sh
 
 ## For manual port selection set any argument to port={port required}, eg. make download port=ttyUSB2 ALL or make download all port=ttyUSB3
@@ -49,6 +55,10 @@ else
 	PORT=${DEFAULT_PORT}
 fi
 
+if ! [ -c "/dev/$PORT" ]; then
+	echo "$PORT is not available"
+	exit
+fi
 WARNING="\n Port $PORT is selected\n\n
 	############################################\n
 	WARNINGS:\n
@@ -113,7 +123,10 @@ function get_executable_name()
 		loadparam) echo "$1";;
 		common) echo "${COMMON_BIN_NAME}";;
 		zoneinfo) echo "zoneinfo.img";;
+		ext_data) echo "${EXTERNAL}.bin";; 
 		resource) echo "${RESOURCE_BIN_NAME}";;
+		userfs) echo "${CONFIG_ARCH_BOARD}_smartfs.bin";;
+		sssfw|wlanfw) echo "$1.bin";;
 		rom) echo "romfs.img";;
 		bootparam)
 			if [[ ! -n "${BOOTPARAM}" ]];then
@@ -121,8 +134,6 @@ function get_executable_name()
 			else
 				echo "${BOOTPARAM}.bin"
 			fi;;
-		userfs) echo "${CONFIG_ARCH_BOARD}_smartfs.bin";;
-		sssfw|wlanfw) echo "$1.bin";;
 		*) echo "No Binary Match"
 		exit 1
 	esac
@@ -191,7 +202,10 @@ function get_configured_partitions()
 	else
 		configured_parts=${CONFIG_FLASH_PART_NAME}
 	fi
-
+	if [[ -n ${CONFIG_ARCH_BOARD_HAVE_SECOND_FLASH} ]];then
+		configured_parts+=${CONFIG_SECOND_FLASH_PART_NAME}
+	fi
+	
 	echo $configured_parts
 }
 
@@ -206,7 +220,9 @@ function get_partition_sizes()
 	else
 		sizes_str=${CONFIG_FLASH_PART_SIZE}
 	fi
-
+	if [[ -n ${CONFIG_ARCH_BOARD_HAVE_SECOND_FLASH} ]];then
+		sizes_str+=${CONFIG_SECOND_FLASH_PART_SIZE}
+	fi
 	echo $sizes_str
 }
 
@@ -225,21 +241,23 @@ download_specific_partition()
 	fi
 
 	# Get a filename and Download a file
-	echo ""
-	echo "============================="
-	if [[ $1 == "ota" || $1 == "OTA" ]];then
-		echo "Downloading Kernel OTA binary"
-	else
-		echo "Downloading ${parts[$partidx]} binary"
+	if [[ $TTYDEV == *"USB"* ]]; then
+		echo ""
+		echo "============================="
+		if [[ $1 == "ota" || $1 == "OTA" ]];then
+			echo "Downloading Kernel OTA binary"
+		else
+			echo "Downloading ${parts[$partidx]} binary"
+		fi
+		echo "============================="
 	fi
-	echo "============================="
-
+	
 	exe_name=$(get_executable_name ${parts[$partidx]})
 	if [[ "No Binary Match" = "${exe_name}" ]];then
 		echo "No corresponding binary for the partition ${parts[$partidx]}"
 		echo "Download $exe_name FAILED!"
 	else
-		board_download $TTYDEV ${offsets[$partidx]} ${exe_name} ${sizes[partidx]} ${parts[$partidx]}
+		board_download $TTYDEV ${offsets[$partidx]} ${exe_name} ${sizes[partidx]} ${parts[$partidx]} $TARGET
 		echo ""
 		echo "Download $exe_name COMPLETE!"
 	fi
@@ -252,7 +270,8 @@ download_all()
 	found_app1=false
 	found_app2=false
 	found_common=false
-
+	found_resource=false
+	
 	for partidx in ${!parts[@]}; do
 
 		if [[ "${CONFIG_APP_BINARY_SEPARATION}" != "y" ]];then
@@ -296,18 +315,23 @@ download_all()
 		if [[ "${parts[$partidx]}" == "config" ]];then
 			continue
 		fi
-
+		if [[ "${parts[$partidx]}" == "resource" ]];then
+			if [[ $found_resource == true ]];then
+				continue
+			fi
+			found_resource=true
+		fi
 		exe_name=$(get_executable_name ${parts[$partidx]})
 		if [[ "No Binary Match" = "${exe_name}" ]];then
 			continue
 		fi
-
-		echo ""
-		echo "=========================="
-		echo "Downloading ${parts[$partidx]} binary"
-		echo "=========================="
-
-		board_download $TTYDEV ${offsets[$partidx]} ${exe_name} ${sizes[partidx]} ${parts[$partidx]}
+		if [[ $TTYDEV == *"USB"* ]]; then
+			echo ""
+			echo "=========================="
+			echo "Downloading ${parts[$partidx]} binary"
+			echo "=========================="
+		fi
+		board_download $TTYDEV ${offsets[$partidx]} ${exe_name} ${sizes[partidx]} ${parts[$partidx]} "ALL"
 	done
 	echo ""
 	echo "Download COMPLETE!"
@@ -325,13 +349,15 @@ erase()
 			if [[ "${parts[$partidx]}" == "ss" ]];then
 				continue
 			else
-				echo ""
-				echo "=========================="
-				echo "Erasing ${parts[$partidx]} partition"
-				echo "=========================="
+				if [[ $TTYDEV == *"USB"* ]]; then
+					echo ""
+					echo "=========================="
+					echo "Erasing ${parts[$partidx]} partition"
+					echo "=========================="
+				fi
 			fi
 
-			board_erase $TTYDEV ${offsets[$partidx]} ${sizes[partidx]} ${parts[$partidx]}
+			board_erase $TTYDEV ${offsets[$partidx]} ${sizes[partidx]} ${parts[$partidx]} $2
 		done
 	else
 		found_kernel=false
@@ -369,11 +395,13 @@ erase()
 				break
 			fi
 
-			echo ""
-			echo "=========================="
-			echo "Erasing ${parts[$partidx]} partition"
-			echo "=========================="
-			board_erase $TTYDEV ${offsets[$partidx]} ${sizes[partidx]} ${parts[$partidx]}
+			if [[ $TTYDEV == *"USB"* ]]; then
+				echo ""
+				echo "=========================="
+				echo "Erasing ${parts[$partidx]} partition"
+				echo "=========================="
+			fi
+			board_erase $TTYDEV ${offsets[$partidx]} ${sizes[partidx]} ${parts[$partidx]} $2
 		done
 	fi
 	echo ""
